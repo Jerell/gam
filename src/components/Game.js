@@ -30,7 +30,7 @@ export default function Game({ socket }) {
 
     p5.setup = () => {
       const gameContainer = document.getElementById("gameContainer");
-      p5.createCanvas(gameContainer.offsetWidth, gameContainer.offsetHeight);
+      p5.createCanvas(p5.windowWidth, p5.windowHeight);
       p5.background(0);
       p5.noStroke();
     };

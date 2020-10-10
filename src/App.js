@@ -7,7 +7,8 @@ import Game from "./components/Game";
 
 const fetch = require("node-fetch");
 
-const serverUrl = "http://82.45.108.39:3001";
+const serverUrl = "http://localhost:8080";
+// const serverUrl = "http://82.45.108.39:3001";
 let socket;
 
 function App() {
@@ -56,22 +57,22 @@ function App() {
     <div className="App">
       <React.Fragment>
         <CssBaseline />
-        <Container>
-          <Box display="flex" flexDirection="column" height="100vh">
-            <Box borderBottom={1}>
-              <Typography variant="h2" component="h1">
-                Gam
-              </Typography>
-            </Box>
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              flexGrow={1}
-            >
-              {joined ? (
-                <Game socket={socket}></Game>
-              ) : (
+        {joined ? (
+          <Game socket={socket}></Game>
+        ) : (
+          <Container>
+            <Box display="flex" flexDirection="column" height="100vh">
+              <Box borderBottom={1}>
+                <Typography variant="h2" component="h1">
+                  Gam
+                </Typography>
+              </Box>
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                flexGrow={1}
+              >
                 <NameField
                   status={serverAvailable}
                   update={updateName}
@@ -79,10 +80,10 @@ function App() {
                   placeholderName={playerName}
                   cb={join}
                 ></NameField>
-              )}
+              </Box>
             </Box>
-          </Box>
-        </Container>
+          </Container>
+        )}
       </React.Fragment>
     </div>
   );
