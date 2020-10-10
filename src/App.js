@@ -1,18 +1,41 @@
-import React from "react";
-import logo from "./logo.svg";
+import React, { useEffect } from "react";
 import "./App.css";
+import { CssBaseline, Typography, Container, Box } from "@material-ui/core";
+import socketIOClient from "socket.io-client";
+import { NameField } from "./components/NameField";
 
-import {
-  CssBaseline,
-  Typography,
-  Container,
-  Grid,
-  Box,
-} from "@material-ui/core";
+const fetch = require("node-fetch");
 
-import NameField from "./components/NameField";
+const serverUrl = "http://localhost:8080";
+let socket;
 
 function App() {
+  const [status, setStatus] = React.useState(false);
+  const [playerName, setPlayerName] = React.useState("Barry");
+
+  function checkStatus(res) {
+    if (res.ok) {
+      // res.status >= 200 && res.status < 300
+      setStatus(true);
+      return res;
+    } else {
+      throw res.statusText;
+    }
+  }
+  function load() {
+    fetch(serverUrl)
+      .then(checkStatus)
+      .then(() => {
+        socket = socketIOClient(serverUrl);
+        return () => socket.disconnect();
+      });
+  }
+
+  function join() {
+    socket.emit("name", playerName);
+  }
+
+  useEffect(load, []);
   return (
     <div className="App">
       <React.Fragment>
@@ -26,7 +49,11 @@ function App() {
             height="50vh"
           >
             <Box>
-              <NameField></NameField>
+              <NameField
+                status={status}
+                update={setPlayerName}
+                cb={join}
+              ></NameField>
             </Box>
           </Box>
         </Container>
