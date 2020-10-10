@@ -30,7 +30,9 @@ function NameField({ update, cb, status, nameError, placeholderName }) {
             />
           </Box>
           <Box>
-            <Button onClick={cb}>Play</Button>
+            <Button onClick={cb} variant="contained" color="primary">
+              Play
+            </Button>
           </Box>
         </form>
       ) : (

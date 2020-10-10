@@ -3,6 +3,7 @@ import "./App.css";
 import { CssBaseline, Typography, Container, Box } from "@material-ui/core";
 import socketIOClient from "socket.io-client";
 import { NameField } from "./components/NameField";
+import Game from "./components/Game";
 
 const fetch = require("node-fetch");
 
@@ -10,9 +11,10 @@ const serverUrl = "http://localhost:8080";
 let socket;
 
 function App() {
-  const [status, setStatus] = React.useState(false);
+  const [serverAvailable, setServerAvailable] = React.useState(false);
   const [playerName, setPlayerName] = React.useState("Barry");
   const [nameError, setNameError] = React.useState(false);
+  const [joined, setJoined] = React.useState(false);
 
   function updateName(n) {
     setPlayerName(n);
@@ -22,7 +24,7 @@ function App() {
   function checkStatus(res) {
     if (res.ok) {
       // res.status >= 200 && res.status < 300
-      setStatus(true);
+      setServerAvailable(true);
       return res;
     } else {
       throw res.statusText;
@@ -39,6 +41,7 @@ function App() {
         });
         socket.on("joined", (n) => {
           console.log(`${n} joined`);
+          setJoined(true);
         });
         return () => socket.disconnect();
       });
@@ -53,22 +56,30 @@ function App() {
     <div className="App">
       <React.Fragment>
         <CssBaseline />
-        <Container mx={0}>
-          <Typography variant="h1">Gam</Typography>
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            height="50vh"
-          >
-            <Box>
-              <NameField
-                status={status}
-                update={updateName}
-                nameError={nameError}
-                placeholderName={playerName}
-                cb={join}
-              ></NameField>
+        <Container>
+          <Box display="flex" flexDirection="column" height="100vh">
+            <Box borderBottom={1}>
+              <Typography variant="h2" component="h1">
+                Gam
+              </Typography>
+            </Box>
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              flexGrow={1}
+            >
+              {joined ? (
+                <Game socket={socket}></Game>
+              ) : (
+                <NameField
+                  status={serverAvailable}
+                  update={updateName}
+                  nameError={nameError}
+                  placeholderName={playerName}
+                  cb={join}
+                ></NameField>
+              )}
             </Box>
           </Box>
         </Container>
