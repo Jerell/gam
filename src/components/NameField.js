@@ -21,6 +21,7 @@ function NameField({ update, cb, status, nameError, placeholderName }) {
             <TextField
               error={nameError}
               helperText={nameError ? "Try a different name" : null}
+              placeholder={placeholderName}
               required
               id="outlined-required"
               label="Name"

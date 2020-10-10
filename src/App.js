@@ -66,6 +66,7 @@ function App() {
                 status={status}
                 update={updateName}
                 nameError={nameError}
+                placeholderName={playerName}
                 cb={join}
               ></NameField>
             </Box>
