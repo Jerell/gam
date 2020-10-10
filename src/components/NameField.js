@@ -10,7 +10,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function NameField({ update, cb, status }) {
+function NameField({ update, cb, status, nameError, placeholderName }) {
   const classes = useStyles();
 
   return (
@@ -19,6 +19,8 @@ function NameField({ update, cb, status }) {
         <form className={classes.root} noValidate autoComplete="off">
           <Box>
             <TextField
+              error={nameError}
+              helperText={nameError ? "Try a different name" : null}
               required
               id="outlined-required"
               label="Name"

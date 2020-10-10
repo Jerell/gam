@@ -12,6 +12,12 @@ let socket;
 function App() {
   const [status, setStatus] = React.useState(false);
   const [playerName, setPlayerName] = React.useState("Barry");
+  const [nameError, setNameError] = React.useState(false);
+
+  function updateName(n) {
+    setPlayerName(n);
+    setNameError(false);
+  }
 
   function checkStatus(res) {
     if (res.ok) {
@@ -27,6 +33,13 @@ function App() {
       .then(checkStatus)
       .then(() => {
         socket = socketIOClient(serverUrl);
+        socket.on("nameTaken", (n) => {
+          setNameError(true);
+          console.log(`${n} is already taken`);
+        });
+        socket.on("joined", (n) => {
+          console.log(`${n} joined`);
+        });
         return () => socket.disconnect();
       });
   }
@@ -51,7 +64,8 @@ function App() {
             <Box>
               <NameField
                 status={status}
-                update={setPlayerName}
+                update={updateName}
+                nameError={nameError}
                 cb={join}
               ></NameField>
             </Box>
