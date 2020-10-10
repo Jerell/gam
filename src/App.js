@@ -5,10 +5,13 @@ import socketIOClient from "socket.io-client";
 import { NameField } from "./components/NameField";
 import Game from "./components/Game";
 
+require("dotenv").config();
+
 const fetch = require("node-fetch");
 
-const serverUrl = "http://localhost:8080";
-// const serverUrl = "http://82.45.108.39:3001";
+const serverUrl = process.env.DEV
+  ? "http://localhost:8080"
+  : "http://82.45.108.39:3001";
 let socket;
 
 function App() {
