@@ -7,7 +7,7 @@ import Game from "./components/Game";
 
 const fetch = require("node-fetch");
 
-const serverUrl = "http://localhost:8080";
+const serverUrl = "http://82.45.108.39:3001";
 let socket;
 
 function App() {
