@@ -3,62 +3,78 @@ import { Box } from "@material-ui/core";
 import p5 from "p5";
 
 class Character {
-  constructor(drawingContext, x, y, color, size, name) {
-    this.x = x;
-    this.y = y;
+  constructor(screen, pos, color, size, name) {
+    this.pos = pos;
     this.size = size;
     this.name = name;
     this.color = color;
-    this.canvas = drawingContext;
-    this.dc = drawingContext.createGraphics(size, size);
-    this.dc.clear();
+    this.canvas = screen;
+    this.page = screen.createGraphics(size, size);
+    this.page.clear();
+    this.page.noStroke();
+  }
+  update(data) {
+    const { pos } = data;
+    this.pos = pos;
   }
   render() {
-    this.dc.clear();
-    this.canvas.image(this.x, this.y, this.size, this.size);
+    this.canvas.image(this.page, this.pos.x, this.pos.y, this.size, this.size);
   }
 }
 
 class Player extends Character {
-  constructor(drawingContext, x, y, color, name) {
-    super(...arguments, 50);
+  constructor(screen, pos, color, name) {
+    super(screen, pos, color, 50, name);
+    console.log(this.name, this.pos);
   }
   draw() {
-    this.dc.fill(this.color);
-    this.dc.square(0, 0, this.size);
-    this.dc.text();
-    // p5.text(data.name, data.x - textWidth / 2, data.y);
+    this.page.fill(this.color);
+    let textWidth = this.page.textWidth(this.name);
+
+    this.page.clear();
+    this.page.square(0, 0, this.size);
+    this.page.fill(0);
+    this.page.text(this.name, this.size / 2 - textWidth / 2, this.size - 5);
+
     this.render();
   }
 }
 
 export default function Game({ socket }) {
   const players = {};
-  function addPlayer(name) {}
+  function addPlayer(p, screen) {
+    players[p.name] = new Player(
+      screen,
+      { x: screen.windowWidth / 2, y: screen.windowHeight / 2 },
+      p.color,
+      p.name
+    );
+  }
+  // function removePlayer(name) {
+  //   delete players[name];
+  // }
+  function selectPlayer(p, screen) {
+    if (!players.hasOwnProperty(p.name)) {
+      addPlayer(p, screen);
+    }
+    return players[p.name];
+  }
 
   const Sketch = (p5) => {
-    // Sending data to the socket
-    function sendmouse(x, y, pX, pY) {
-      const data = {
-        x: x,
-        y: y,
-        px: pX,
-        py: pY,
-      };
-      socket.emit("mouse", data);
+    function select(p) {
+      return selectPlayer(p, p5);
+    }
+    function bg(col = 0) {
+      p5.background(col);
     }
 
-    function receiveMouse(data) {
-      p5.fill(data.color);
-      p5.ellipse(data.pos.x, data.pos.y, 50, 50);
-      // name
-      let textWidth = p5.textWidth(data.name);
-      p5.fill(0);
-      p5.text(data.name, data.pos.x - textWidth / 2, data.pos.y);
-    }
-
-    socket.on("mouse", (data) => {
-      receiveMouse(data);
+    socket.on("state", (state) => {
+      bg(0);
+      for (let player of state) {
+        let p = select(player, p5);
+        p.update(player);
+        p.draw();
+      }
     });
 
     p5.setup = () => {
@@ -68,11 +84,68 @@ export default function Game({ socket }) {
       p5.noStroke();
     };
 
-    p5.mouseMoved = () => {
-      const { mouseX: x, mouseY: y, pmouseX: pX, pmouseY: pY } = p5;
-      sendmouse(x, y, pX, pY);
-    };
+    let lastUpdateTime = new Date().getTime();
+    setInterval(function () {
+      let currentTime = new Date().getTime();
+      // let timeDifference = currentTime - lastUpdateTime;
+
+      socket.emit("movement", movement);
+
+      lastUpdateTime = currentTime;
+    }, 1000 / 60);
   };
+
+  // Keybinds
+  const movement = {
+    up: false,
+    down: false,
+    left: false,
+    right: false,
+  };
+  document.addEventListener("keydown", function (event) {
+    switch (event.key) {
+      case "w":
+      case "ArrowUp":
+        movement.up = true;
+        break;
+      case "a":
+      case "ArrowLeft":
+        movement.left = true;
+        break;
+      case "s":
+      case "ArrowDown":
+        movement.down = true;
+        break;
+      case "d":
+      case "ArrowRight":
+        movement.right = true;
+        break;
+      default:
+        console.log(`${event.key} is not bound to an action`);
+    }
+  });
+  document.addEventListener("keyup", function (event) {
+    switch (event.key) {
+      case "w":
+      case "ArrowUp":
+        movement.up = false;
+        break;
+      case "a":
+      case "ArrowLeft":
+        movement.left = false;
+        break;
+      case "s":
+      case "ArrowDown":
+        movement.down = false;
+        break;
+      case "d":
+      case "ArrowRight":
+        movement.right = false;
+        break;
+      default:
+        console.log(`${event.key} is not bound to an action`);
+    }
+  });
 
   let gRef = React.createRef();
 
